@@ -9,6 +9,7 @@ Resource  ./commonKeywords.robot
 ${coreMetadataUrl}  http://${BASE_URL}:${CORE_METADATA_PORT}
 ${deviceProfileUri}    /api/v1/deviceprofile
 ${deviceUri}    /api/v1/device
+${deviceServiceUri}  /api/v1/deviceservice
 ${LOG_FILE_PATH}     ${WORK_DIR}/TAF/testArtifacts/logs/coreMetadataAPI.log
 
 *** Keywords ***
@@ -124,6 +125,15 @@ Create device profile and device
     Create device profile
     Create device   create_device.json
 
+Update Device
+    [Arguments]  ${state}
+    Create Session  Core Metadata  url=${coreMetadataUrl}
+    ${data}=  Get File  ${WORK_DIR}/TAF/config/${PROFILE}/create_disabled_device.json  encoding=UTF-8
+    ${newdata}=  replace string  ${data}  UNLOCKED  ${state}
+    ${headers}=  Create Dictionary  Content-Type=application/json
+    ${resp}=  Put Request  Core Metadata  ${deviceUri}  json=${newdata}  headers=${headers}
+    run keyword if  ${resp.status_code}!=200  log   ${resp.content}
+    set test variable  ${response}  ${resp.status_code}
 
 # Addressable
 Create addressable ${entity}
@@ -143,12 +153,14 @@ Delete addressable by name ${addressableName}
 Create device service ${entity}
     Create Session  Core Metadata  url=${coreMetadataUrl}
     ${headers}=  Create Dictionary  Content-Type=application/json
-    ${resp}=  Post Request  Core Metadata    /api/v1/deviceservice  json=${entity}   headers=${headers}
+    ${resp}=  Post Request  Core Metadata    ${deviceServiceUri}  json=${entity}   headers=${headers}
     run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
     Set test variable  ${response}  ${resp.status_code}
 
 Delete device service by name ${deviceServiceName}
     Create Session  Core Metadata  url=${coreMetadataUrl}
-    ${resp}=  Delete Request  Core Metadata  api/v1/deviceservice/name/${deviceServiceName}
+    ${resp}=  Delete Request  Core Metadata  ${deviceServiceUri}/name/${deviceServiceName}
     run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
     Should Be Equal As Strings  ${resp.status_code}  200
+
+
