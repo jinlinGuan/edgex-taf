@@ -62,6 +62,22 @@ Delete device profile by name ${device_profile_name}
     run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
     Should Be Equal As Strings  ${resp.status_code}  200
 
+Update Device profile
+    #[Arguments]  ${key}  ${value}
+    Create Session  Core Metadata  url=${coreMetadataUrl}
+    ${file_data}=  Get File  ${WORK_DIR}/TAF/config/${PROFILE}/sample_profile.yaml
+    ${newdata}=  replace string  ${file_data}  Example of Device    test
+    log to console  ${newdata}
+    ${files}=  Create Dictionary  file=${newdata}
+    #${headers}=  Create Dictionary  Content-Type=application/json
+    ${resp}=  Put Request  Core Metadata  ${deviceProfileUri}  files=${files}
+    run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
+    Should Be Equal As Strings  ${resp.status_code}  200
+    #${resp}=   Get Request   Device Service    /api/v1/config
+    #${result} =  convert to string   ${resp.json()["Service"]["ConnectRetries"]}
+    #Should contain      ${result}  10
+
+
 # Device
 Create device
     [Arguments]  ${device_file}
@@ -126,14 +142,14 @@ Create device profile and device
     Create device   create_device.json
 
 Update Device
-    [Arguments]  ${state}
+    [Arguments]  ${key}  ${value}
+    ${device_name}=  Query device by id and return device name
     Create Session  Core Metadata  url=${coreMetadataUrl}
-    ${data}=  Get File  ${WORK_DIR}/TAF/config/${PROFILE}/create_disabled_device.json  encoding=UTF-8
-    ${newdata}=  replace string  ${data}  UNLOCKED  ${state}
+    ${data}=  Create Dictionary  name=${device_name}  ${key}=${value}
     ${headers}=  Create Dictionary  Content-Type=application/json
-    ${resp}=  Put Request  Core Metadata  ${deviceUri}  json=${newdata}  headers=${headers}
-    run keyword if  ${resp.status_code}!=200  log   ${resp.content}
-    set test variable  ${response}  ${resp.status_code}
+    ${resp}=  Put Request  Core Metadata  ${deviceUri}/name/${deviceName}  json=${data}  headers=${headers}
+    run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
+    Should Be Equal As Strings  ${resp.status_code}  200
 
 # Addressable
 Create addressable ${entity}

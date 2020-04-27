@@ -24,25 +24,29 @@ Notification has been created
 
 *** Test Cases ***
 Notification should be created if adding new device
-#    [Tags]  test
+    [Tags]  done
     When Create device  create_device.json
     Then Notification has been created  Test-Device-POST
 
 Notification should be created if device adminState has been updated
-   [Tags]  test
-    #Given Create Device  create_disabled_device.json
-    When Update Device  LOCKED
-#    Then Notification has been created
+    [Tags]  done
+    Given Create Device  create_locked_device.json
+    When Update Device  adminState  UNLOCKED
+    Then Notification has been created  Locked-Device-PUT
+    [Teardown]  Delete Device by name
 
 Notification should be created if device operationState has been updated
-    Given Create Device
-    When Update Device  opstate
-    Then Notification has been created
-# /v1/deviceservice/name/{name}/opstate/{opState}
+    [Tags]  done
+    Given Create Device  create_disabled_device.json
+    When Update Device  operatingState  ENABLED
+    Then Notification has been created  Disabled-Device-PUT
+    [Teardown]  Delete Device by name Disabled-Device
+
 Notification should be created if device profile has been changed
-    Given Create Device
-    When Update Device ${profileChanged}
-    Then Notification has been created
+    [Tags]  test
+    Given Create Device  create_device.json
+    When Update Device profile
+    #Then Notification has been created
 
 Notification should be created if autoEvent has been changed
     Given Create Device
@@ -50,6 +54,6 @@ Notification should be created if autoEvent has been changed
     Then Notification has been created
 
 Notification should be created if deleting device
-#    [Tags]  test
-    When Delete Device by name Disabled-Device
-    Then Notification has been created  Test-Device-DELETE
+    [Tags]  delete
+    When Delete Device by name Test-Device
+    #Then Notification has been created  Test-Device-DELETE
