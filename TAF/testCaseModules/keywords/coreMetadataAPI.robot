@@ -62,22 +62,6 @@ Delete device profile by name ${device_profile_name}
     run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
     Should Be Equal As Strings  ${resp.status_code}  200
 
-Update Device profile
-    #[Arguments]  ${key}  ${value}
-    Create Session  Core Metadata  url=${coreMetadataUrl}
-    ${file_data}=  Get File  ${WORK_DIR}/TAF/config/${PROFILE}/sample_profile.yaml
-    ${newdata}=  replace string  ${file_data}  Example of Device    test
-    log to console  ${newdata}
-    ${files}=  Create Dictionary  file=${newdata}
-    #${headers}=  Create Dictionary  Content-Type=application/json
-    ${resp}=  Put Request  Core Metadata  ${deviceProfileUri}  files=${files}
-    run keyword if  ${resp.status_code}!=200  log to console  ${resp.content}
-    Should Be Equal As Strings  ${resp.status_code}  200
-    #${resp}=   Get Request   Device Service    /api/v1/config
-    #${result} =  convert to string   ${resp.json()["Service"]["ConnectRetries"]}
-    #Should contain      ${result}  10
-
-
 # Device
 Create device
     [Arguments]  ${device_file}

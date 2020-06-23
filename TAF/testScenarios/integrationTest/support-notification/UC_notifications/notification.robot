@@ -40,20 +40,26 @@ Notification should be created if device operationState has been updated
     Given Create Device  create_disabled_device.json
     When Update Device  operatingState  ENABLED
     Then Notification has been created  Disabled-Device-PUT
-    [Teardown]  Delete Device by name Disabled-Device
+    [Teardown]  Delete Device by name
 
 Notification should be created if device profile has been changed
-    [Tags]  test
-    Given Create Device  create_device.json
-    When Update Device profile
-    #Then Notification has been created
+    [Tags]  Skipped
+    Given Create Device
+    When Update Device ${profileChanged}
+    Then  Notification has been created
 
 Notification should be created if autoEvent has been changed
-    Given Create Device
+    [Tags]  test
+    @{data_types_skip_write_only}=  Skip write only commands
+    ${last_reading}=  Get last support reading
+    ${reading_name}=  set variable  ${data_types_skip_write_only}[${last_reading}][readingName]
+    ${frequency_value}=  set variable  8
+    ${onChange_value}=  set variable  false
+    Creat device with autoEvents parameter  ${frequency_value}  ${onChange_value}  ${reading_name}
     When Update Device ${autoEventChanged}
     Then Notification has been created
 
 Notification should be created if deleting device
     [Tags]  delete
     When Delete Device by name Test-Device
-    #Then Notification has been created  Test-Device-DELETE
+    Then Notification has been created  Test-Device-DELETE
